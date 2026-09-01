@@ -1,0 +1,1 @@
+"""CampusNav backend application package."""
