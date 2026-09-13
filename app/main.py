@@ -1,22 +1,53 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from app.core.config import settings
+
+# Import all models so SQLAlchemy's metadata is populated on startup.
+# Even though we never call create_all (Supabase manages the schema),
+# models must be registered for relationships and query mapping to work.
+import app.models  # noqa: F401
 
 from app.api import admin, auth, buildings, departments, floors, locations, navigation
 
 app = FastAPI(
-    title="CampusNav Backend",
-    description="Indoor navigation backend for campus wayfinding",
-    version="0.1.0",
+    title="CampusNav API",
+    description="Indoor navigation backend for Kalsekar Technical Campus",
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc",
 )
 
-app.include_router(auth.router, prefix="/auth", tags=["auth"])
-app.include_router(departments.router, prefix="/departments", tags=["departments"])
-app.include_router(buildings.router, prefix="/buildings", tags=["buildings"])
-app.include_router(floors.router, prefix="/floors", tags=["floors"])
-app.include_router(locations.router, prefix="/locations", tags=["locations"])
-app.include_router(navigation.router, prefix="/navigation", tags=["navigation"])
-app.include_router(admin.router, prefix="/admin", tags=["admin"])
+# ---------------------------------------------------------------------------
+# CORS — allow the Next.js frontend (and any extra origins in .env)
+# ---------------------------------------------------------------------------
+origins = [origin.strip() for origin in settings.cors_origins.split(",") if origin.strip()]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# ---------------------------------------------------------------------------
+# Routers — all mounted under /api/v1
+# ---------------------------------------------------------------------------
+API_PREFIX = "/api/v1"
+
+app.include_router(auth.router,        prefix=f"{API_PREFIX}/auth",        tags=["auth"])
+app.include_router(departments.router, prefix=f"{API_PREFIX}/departments",  tags=["departments"])
+app.include_router(buildings.router,   prefix=f"{API_PREFIX}/buildings",    tags=["buildings"])
+app.include_router(floors.router,      prefix=f"{API_PREFIX}/floors",       tags=["floors"])
+app.include_router(locations.router,   prefix=f"{API_PREFIX}/locations",    tags=["locations"])
+app.include_router(navigation.router,  prefix=f"{API_PREFIX}/navigation",   tags=["navigation"])
+app.include_router(admin.router,       prefix=f"{API_PREFIX}/admin",        tags=["admin"])
 
 
-@app.get("/health")
+# ---------------------------------------------------------------------------
+# Health check
+# ---------------------------------------------------------------------------
+@app.get("/health", tags=["health"])
 def health_check() -> dict[str, str]:
-    return {"status": "ok"}
+    return {"status": "ok", "environment": settings.environment}
