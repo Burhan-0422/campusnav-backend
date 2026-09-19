@@ -3,8 +3,9 @@ from pydantic import BaseModel
 
 class FloorBase(BaseModel):
     building_id: int
-    level: int
-    name: str | None = None
+    floor_number: int
+    name: str
+    map_url: str | None = None
 
 
 class FloorCreate(FloorBase):

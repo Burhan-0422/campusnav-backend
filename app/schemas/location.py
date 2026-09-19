@@ -18,3 +18,13 @@ class LocationRead(LocationBase):
 
     class Config:
         from_attributes = True
+
+
+class NavLocationItem(BaseModel):
+    id: str
+    name: str
+    category: str
+    nodeId: str
+    roomCode: str | None = None
+    subtitle: str
+    floor: str

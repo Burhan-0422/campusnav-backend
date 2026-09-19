@@ -11,3 +11,16 @@ class RouteResponse(BaseModel):
     path: list[int]
     distance: float | None = None
     instructions: list[str] = []
+
+
+class FloorTransition(BaseModel):
+    fromNode: str
+    toNode: str
+    fromFloor: str
+    toFloor: str
+
+
+class NavigationRouteResponse(BaseModel):
+    path: list[str]
+    totalDistance: float
+    floorTransitions: list[FloorTransition] = []

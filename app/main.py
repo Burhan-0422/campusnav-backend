@@ -4,8 +4,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 
 # Import all models so SQLAlchemy's metadata is populated on startup.
-# Even though we never call create_all (Supabase manages the schema),
-# models must be registered for relationships and query mapping to work.
 import app.models  # noqa: F401
 
 from app.api import admin, auth, buildings, departments, floors, locations, navigation
@@ -32,7 +30,7 @@ app.add_middleware(
 )
 
 # ---------------------------------------------------------------------------
-# Routers — all mounted under /api/v1
+# Routers — mounted under /api/v1
 # ---------------------------------------------------------------------------
 API_PREFIX = "/api/v1"
 
@@ -43,6 +41,12 @@ app.include_router(floors.router,      prefix=f"{API_PREFIX}/floors",       tags
 app.include_router(locations.router,   prefix=f"{API_PREFIX}/locations",    tags=["locations"])
 app.include_router(navigation.router,  prefix=f"{API_PREFIX}/navigation",   tags=["navigation"])
 app.include_router(admin.router,       prefix=f"{API_PREFIX}/admin",        tags=["admin"])
+
+# ---------------------------------------------------------------------------
+# Frontend compatibility aliases — direct /api/route and /api/locations
+# ---------------------------------------------------------------------------
+app.include_router(navigation.router,  prefix="/api",                      tags=["navigation"], include_in_schema=False)
+app.include_router(locations.router,   prefix="/api/locations",            tags=["locations"],  include_in_schema=False)
 
 
 # ---------------------------------------------------------------------------

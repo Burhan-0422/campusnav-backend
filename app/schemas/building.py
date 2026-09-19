@@ -3,7 +3,9 @@ from pydantic import BaseModel
 
 class BuildingBase(BaseModel):
     name: str
-    code: str
+    code: str | None = None
+    department_id: int | None = None
+    description: str | None = None
     latitude: float | None = None
     longitude: float | None = None
 
